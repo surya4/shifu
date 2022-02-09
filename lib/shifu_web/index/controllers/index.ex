@@ -6,8 +6,7 @@ defmodule ShifuWeb.IndexController do
 
   def index(conn, _params) do
     payload = %{
-      message:
-        "If you are truly at peace, you can do anything.",
+      message: "If you are truly at peace, you can do anything.",
       info: "Shifu Index API"
     }
 
