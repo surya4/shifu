@@ -1,0 +1,60 @@
+name: Backend Code Quality
+
+on:
+  pull_request:
+  push:
+    paths-ignore:
+    - '.github/workflows/tagged_tests.yml'
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pair:
+              elixir: 1.13.2
+              otp: 24
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Initial setup
+        uses: erlef/setup-elixir@v1
+        with:
+          otp-version: ${{ matrix.pair.otp }}
+          elixir-version: ${{ matrix.pair.elixir }}
+      - name: Set up dependency cache
+        uses: actions/cache@v1
+        with:
+          path: deps/
+          key: ${{ runner.os }}-${{ matrix.pair.otp }}-${{ matrix.pair.elixir }}-deps-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.pair.otp }}-${{ matrix.pair.elixir }}-deps-
+      - name: Set up build cache
+        uses: actions/cache@v1
+        with:
+          path: _build/test/
+          key: ${{ runner.os }}-${{ matrix.pair.otp }}-${{ matrix.pair.elixir }}-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.pair.otp }}-${{ matrix.pair.elixir }}-build-
+      
+      - name: Set up PLT cache
+        uses: actions/cache@v1
+        with:
+          path: priv/plts/
+          key: ${{ runner.os }}-${{ matrix.pair.otp }}-${{ matrix.pair.elixir }}-plt-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.pair.otp }}-${{ matrix.pair.elixir }}-plt-
+      
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Check format
+        run: mix format --check-formatted  
+
+      - name: Check Compile Warnings
+        run: mix compile --warnings-as-errors --all-warnings
+
+      - name: Run Dialyzer
+        run: mix dialyzer
+
+      - name: Credo Validations
+        run: mix credo

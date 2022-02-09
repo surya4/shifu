@@ -1,0 +1,48 @@
+defmodule ShifuWeb.ConnCase do
+  @moduledoc """
+  This module defines the test case to be used by
+  tests that require setting up a connection.
+
+  Such tests rely on `Phoenix.ConnTest` and also
+  import other functionality to make it easier
+  to build common data structures and query the data layer.
+
+  Finally, if the test case interacts with the database,
+  we enable the SQL sandbox, so changes done to the database
+  are reverted at the end of every test. If you are using
+  PostgreSQL, you can even run database tests asynchronously
+  by setting `use ShifuWeb.ConnCase, async: true`, although
+  this option is not recommended for other databases.
+  """
+
+  use ExUnit.CaseTemplate
+
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Phoenix.ConnTest
+
+  using do
+    quote do
+      # Import conveniences for testing with connections
+      import Plug.Conn
+      import Phoenix.ConnTest
+      import ShifuWeb.ConnCase
+
+      alias ShifuWeb.Router.Helpers, as: Routes
+      import Shifu.Factory
+
+      # The default endpoint for testing
+      @endpoint ShifuWeb.Endpoint
+    end
+  end
+
+  setup tags do
+    # Explicitly get a connection before each test
+    :ok = Sandbox.checkout(Shifu.Repo)
+
+    unless tags[:async] do
+      Sandbox.mode(Shifu.Repo, {:shared, self()})
+    end
+
+    {:ok, conn: ConnTest.build_conn()}
+  end
+end

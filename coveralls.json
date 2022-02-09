@@ -1,0 +1,11 @@
+{
+  "coverage_options": {
+    "output_dir": "cover/",
+    "treat_no_relevant_lines_as_covered": true,
+    "minimum_coverage": 80
+    },
+  "skip_files": [
+      "test/support",
+      "scripts/coverage-json-to-metrics"
+  ]
+}
