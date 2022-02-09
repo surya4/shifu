@@ -15,8 +15,7 @@ defmodule ShifuWeb.IndexControllerTest do
       assert json_response(resp, 200) == %{
                "content" => %{
                  "info" => "Shifu Index API",
-                 "message" =>
-                   "If you are truly at peace, you can do anything."
+                 "message" => "If you are truly at peace, you can do anything."
                }
              }
     end
@@ -32,8 +31,7 @@ defmodule ShifuWeb.IndexControllerTest do
 
       assert json_response(resp, 404) == %{
                "error" => %{
-                 "message" =>
-                   "API not found. Please check the API URL and request method type."
+                 "message" => "API not found. Please check the API URL and request method type."
                }
              }
     end

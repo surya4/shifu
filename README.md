@@ -4,7 +4,12 @@
 
 ## Introduction
 
-Shifu: Elixir Boilerplate with Postgres
+Shifu: Elixir Boilerplate:
+
+- Postgres
+- Sentry
+- Redis (Todo)
+- Sockets (Todo)
 
 ## Dependencies
 
