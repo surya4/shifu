@@ -55,18 +55,18 @@ jobs:
           otp-version: ${{ matrix.pair.otp }}
           elixir-version: ${{ matrix.pair.elixir }}
 
-      - name: Create code coverage status for the current commit
-        if: ${{ github.event_name == 'pull_request'}}
-        run: |
-          curl "https://{GIT_USER}:${GIT_TOKEN}@api.github.com/repos/${ORG_NAME}/${PROJECT_NAME}/statuses/${COMMIT_SHA}" -d "{\"state\": \"pending\",\"target_url\": \"https://github.com/${ORG_NAME}/${PROJECT_NAME}/actions/runs/${RUN_ID}\",\"description\": \"in progress — This check has started... \",\"context\": \"Code Coverage\"}"
-        env:
-          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
-          GIT_USER: ${{ secrets.GIT_USER }}
-          ORG_NAME: ${{ secrets.ORG_NAME }}
-          PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-          RUN_ID: ${{ github.run_id }}
-          PULL_NUMBER: ${{ github.event.pull_request.number }}
+      # - name: Create code coverage status for the current commit
+      #   if: ${{ github.event_name == 'pull_request'}}
+      #   run: |
+      #     curl "https://{GIT_USER}:${GIT_TOKEN}@api.github.com/repos/${ORG_NAME}/${PROJECT_NAME}/statuses/${COMMIT_SHA}" -d "{\"state\": \"pending\",\"target_url\": \"https://github.com/${ORG_NAME}/${PROJECT_NAME}/actions/runs/${RUN_ID}\",\"description\": \"in progress — This check has started... \",\"context\": \"Code Coverage\"}"
+      #   env:
+      #     GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+      #     GIT_USER: ${{ secrets.GIT_USER }}
+      #     ORG_NAME: ${{ secrets.ORG_NAME }}
+      #     PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+      #     COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+      #     RUN_ID: ${{ github.run_id }}
+      #     PULL_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Install dependencies
         run: mix deps.get
@@ -74,49 +74,49 @@ jobs:
       - name: Run tests with coverage
         run: mix coveralls.json
 
-      - name: Write coverage in json file
-        run: scripts/coverage-json-to-metrics
+      # - name: Write coverage in json file
+      #   run: scripts/coverage-json-to-metrics
 
-      - name: Generate coverage badge
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        run: |
-          set -x
+      # - name: Generate coverage badge
+      #   if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      #   run: |
+      #     set -x
   
-          TOTAL=`node -e "console.log(require('./cover/coverage-summary.json').coverage)"`
-          export TOTAL
-          COLOR=`node -e "t = parseInt(process.env.TOTAL); console.log(t > 80 ? 'green': (t > 50 ? 'orange': 'red'))"`
+      #     TOTAL=`node -e "console.log(require('./cover/coverage-summary.json').coverage)"`
+      #     export TOTAL
+      #     COLOR=`node -e "t = parseInt(process.env.TOTAL); console.log(t > 80 ? 'green': (t > 50 ? 'orange': 'red'))"`
   
-          curl "https://img.shields.io/badge/Code%20Coverage-$TOTAL%25-$COLOR" > coverage.svg
+      #     curl "https://img.shields.io/badge/Code%20Coverage-$TOTAL%25-$COLOR" > coverage.svg
   
-      - name: Set up Cloud SDK
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: google-github-actions/setup-gcloud@v0
-        with:
-          project_id: ${{ secrets.PROJECT_ID }}
-          service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
-          export_default_credentials: true
+      # - name: Set up Cloud SDK
+      #   if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      #   uses: google-github-actions/setup-gcloud@v0
+      #   with:
+      #     project_id: ${{ secrets.PROJECT_ID }}
+      #     service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
+      #     export_default_credentials: true
   
-      - name: Publish coverage badge
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        run: |
-          gsutil -h "Cache-Control: no-cache" cp coverage.svg gs://shifu_assets/source/$GITHUB_REPOSITORY/$GITHUB_REF/coverage.svg
+      # - name: Publish coverage badge
+      #   if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      #   run: |
+      #     gsutil -h "Cache-Control: no-cache" cp coverage.svg gs://shifu_assets/source/$GITHUB_REPOSITORY/$GITHUB_REF/coverage.svg
   
-      - name: Update code coverage status for the current commit
-        if: ${{ github.event_name == 'pull_request'}}
-        run: |
-          set -x
-          TOTAL=`node -e "console.log(require('./cover/coverage-summary.json').coverage)"`
-          export TOTAL
-          export STATE=success # Later can be based on compare to the target branch.
+      # - name: Update code coverage status for the current commit
+      #   if: ${{ github.event_name == 'pull_request'}}
+      #   run: |
+      #     set -x
+      #     TOTAL=`node -e "console.log(require('./cover/coverage-summary.json').coverage)"`
+      #     export TOTAL
+      #     export STATE=success # Later can be based on compare to the target branch.
   
-          curl "https://{GIT_USER}:${GIT_TOKEN}@api.github.com/repos/${ORG_NAME}/${PROJECT_NAME}/statuses/${COMMIT_SHA}" -d "{\"state\": \"${STATE}\",\"target_url\": \"https://github.com/${ORG_NAME}/${PROJECT_NAME}/actions/runs/${RUN_ID}\",\"description\": \"$TOTAL%\",\"context\": \"Code Coverage\"}"
-        env:
-          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
-          GIT_USER: ${{ secrets.GIT_USER }}
-          ORG_NAME: ${{ secrets.ORG_NAME }}
-          PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-          PULL_NUMBER: ${{ github.event.pull_request.number }}
-          RUN_ID: ${{ github.run_id }}
+      #     curl "https://{GIT_USER}:${GIT_TOKEN}@api.github.com/repos/${ORG_NAME}/${PROJECT_NAME}/statuses/${COMMIT_SHA}" -d "{\"state\": \"${STATE}\",\"target_url\": \"https://github.com/${ORG_NAME}/${PROJECT_NAME}/actions/runs/${RUN_ID}\",\"description\": \"$TOTAL%\",\"context\": \"Code Coverage\"}"
+      #   env:
+      #     GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+      #     GIT_USER: ${{ secrets.GIT_USER }}
+      #     ORG_NAME: ${{ secrets.ORG_NAME }}
+      #     PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+      #     COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+      #     PULL_NUMBER: ${{ github.event.pull_request.number }}
+      #     RUN_ID: ${{ github.run_id }}
   
   
